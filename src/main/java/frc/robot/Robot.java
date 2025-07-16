@@ -133,28 +133,30 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
    
   //Tank Drive
-  /*
+  
   double leftPower = joystick.getLeftY();
   double rightPower = joystick.getRightY();
 
-  leftLeader.set(Math.pow(leftPower, 3));
-  rightLeader.set(Math.pow(rightPower, 3));
+  leftLeader.set(((Math.pow(leftPower, 3))*0.9)*0.5);
+  rightLeader.set(((Math.pow(rightPower, 3))*0.5)*0.5);
   
-   */
+  
 
     //Arcade Drive
+     /*
     double forward = Math.pow(joystick.getLeftY(), 3);
     double rotation = Math.pow(joystick.getRightX(), 3);
 
     leftLeader.set(forward - rotation);
    
-    rightLeader.set(forward + rotation);
+    rightLeader.set((forward + rotation));
+    */
 
     //Elevator
 
     double rightTrigger = joystick.getRightTriggerAxis();
     double leftTrigger = joystick.getLeftTriggerAxis();
-    double elevatorPower = rightTrigger - leftTrigger;
+    double elevatorPower = ((Math.pow(((rightTrigger - leftTrigger)), 3)) * 0.5);
     elevatorLeader.set(elevatorPower);
   }
 
