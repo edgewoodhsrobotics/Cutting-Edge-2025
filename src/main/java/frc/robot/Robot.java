@@ -124,8 +124,9 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     double time = autoTimer.get();
-  
-if (time < 5.5) {
+  //Right 
+  /*
+   * if (time < 5.5) {
       leftLeader.set(0.3);
       rightLeader.set(0.3);
     } else if (time < 6.2) {
@@ -138,7 +139,27 @@ if (time < 5.5) {
       } else {
       leftLeader.set(0);
       rightLeader.set(0);
-    }
+    } 
+   */
+
+
+    //Left
+if (time < 5.5) {
+  leftLeader.set(0.3);
+  rightLeader.set(0.3);
+} else if (time < 6.2) {
+leftLeader.set(-0.5);
+rightLeader.set(0.0);
+}
+else if (time < 8.5) {
+  leftLeader.set(0.3);
+  rightLeader.set(0.3);
+  } else {
+  leftLeader.set(0);
+  rightLeader.set(0);
+}
+
+
   
   }
 
