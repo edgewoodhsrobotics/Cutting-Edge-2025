@@ -3,22 +3,26 @@
 // the WPILib BSD license file in the root directory of this project.
 
 
+
+
 package frc.robot;
 
 
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.SparkMax;
+
+
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.Solenoid;
 
 public class Robot extends TimedRobot {
   SparkMax leftLeader;
@@ -27,9 +31,12 @@ public class Robot extends TimedRobot {
   SparkMax rightFollower;
   SparkMax elevatorLeader;
   SparkMax elevatorFollower;
+  SparkMax armTop;
+  SparkMax armBottom;
   XboxController joystick;
-  Solenoid latchSolenoid;
+ 
   Timer autoTimer;
+
 
   public Robot() {
     // Initialize the SPARKs
@@ -39,8 +46,12 @@ public class Robot extends TimedRobot {
     rightFollower = new SparkMax(1, MotorType.kBrushed);
     elevatorLeader = new SparkMax(5, MotorType.kBrushless);
     elevatorFollower = new SparkMax(6, MotorType.kBrushless);
-    latchSolenoid = new Solenoid(PneumaticsModuleType.REVPH, 0);
+    armTop = new SparkMax(8, MotorType.kBrushless);
+    armBottom = new SparkMax(7, MotorType.kBrushless);
+   
     autoTimer = new Timer();
+
+
 
 
     /*
@@ -53,7 +64,9 @@ public class Robot extends TimedRobot {
     SparkMaxConfig rightFollowerConfig = new SparkMaxConfig();
     SparkMaxConfig elevatorLeaderConfig = new SparkMaxConfig();
     SparkMaxConfig elevatorFollowerConfig = new SparkMaxConfig();
-    
+    SparkMaxConfig armTopConfig = new SparkMaxConfig();
+    SparkMaxConfig armBottomConfig = new SparkMaxConfig();
+   
     /*
      * Set parameters that will apply to all SPARKs. We will also use this as
      * the left leader config.
@@ -62,29 +75,44 @@ public class Robot extends TimedRobot {
         .smartCurrentLimit(50)
         .idleMode(IdleMode.kBrake);
 
+
     // Apply the global config and invert since it is on the opposite side
     rightLeaderConfig
         .apply(globalConfig)
         .inverted(true);
+
 
     // Apply the global config and set the leader SPARK for follower mode
     leftFollowerConfig
         .apply(globalConfig)
         .follow(leftLeader);
 
+
     // Apply the global config
     rightFollowerConfig
         .apply(globalConfig)
         .follow(rightLeader);
 
+
     // Apply the global config and set the leader SPARK for follower mode
+
 
     elevatorLeaderConfig
     .apply(globalConfig);
 
-    elevatorFollowerConfig 
+
+    elevatorFollowerConfig
     .apply(globalConfig)
     .follow(elevatorLeader);
+
+
+    armBottomConfig.apply(globalConfig);
+
+
+    armTopConfig.apply(globalConfig);
+
+
+
 
     /*
      * Apply the configuration to the SPARKs.
@@ -102,10 +130,14 @@ public class Robot extends TimedRobot {
     rightFollower.configure(rightFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     elevatorLeader.configure(elevatorLeaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     elevatorFollower.configure(elevatorFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    armTop.configure(armTopConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    armBottom.configure(armBottomConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
 
     // Initialize joystick
     joystick = new XboxController(0);
   }
+
 
   @Override
   public void robotPeriodic() {
@@ -114,6 +146,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Right Out", rightLeader.getAppliedOutput());
   }
 
+
   @Override
   public void autonomousInit() {
     autoTimer.reset();
@@ -121,10 +154,12 @@ public class Robot extends TimedRobot {
   }
 
 
+
+
   @Override
   public void autonomousPeriodic() {
     double time = autoTimer.get();
-  //Right 
+  //Right
   /*
    * if (time < 5.5) {
       leftLeader.set(0.3);
@@ -139,8 +174,10 @@ public class Robot extends TimedRobot {
       } else {
       leftLeader.set(0);
       rightLeader.set(0);
-    } 
+    }
    */
+
+
 
 
     //Left
@@ -160,8 +197,10 @@ else if (time < 8.5) {
 }
 
 
-  
+ 
   }
+
+
 
 
   @Override
@@ -169,54 +208,72 @@ else if (time < 8.5) {
   }
 
 
+
+
   @Override
   public void teleopPeriodic() {
-   
   //Tank Drive
   /*
   double leftPower = joystick.getLeftY();
   double rightPower = joystick.getRightY();
 
+
   leftLeader.set(((Math.pow(leftPower, 3))*0.9)*0.5);
   rightLeader.set(((Math.pow(rightPower, 3))*0.5)*0.5);
    */
-  
+ 
+
 
     //Arcade Drive
-    
+   
     double forward = (Math.pow(joystick.getLeftY(), 3))*0.30;
     double rotation = (Math.pow(joystick.getRightX(), 3))*0.30;
 
-    leftLeader.set(forward - rotation);
-   
-    rightLeader.set((forward + rotation));
-    
 
+    leftLeader.set(forward - rotation);
+    rightLeader.set((forward + rotation));
+
+
+  //Arm Top
+  if (joystick.getAButton()) {
+      armTop.set(0.1); 
+  } else {
+      armTop.set(0);
+
+
+  //Arm Bottom
+  if (joystick.getXButton()) {
+    armBottom.set(-0.1);
+  } else {
+    armBottom.set(0);
+
+    if (joystick.getYButton()){
+      armBottom.set(0.1);
+    } else {
+      armBottom.set(0);
+
+    }
     //Elevator
+
 
     double rightTrigger = joystick.getRightTriggerAxis();
     double leftTrigger = joystick.getLeftTriggerAxis();
     double elevatorPower = ((Math.pow(((rightTrigger - leftTrigger)), 3)) * 0.5);
     elevatorLeader.set(elevatorPower);
-
-    //Switch
-    if (joystick.getAButton()) {
-      latchSolenoid.set(true);  // Unlock
-  } else {
-      latchSolenoid.set(false); // Lock
   }
-  
   }
+}
 
 
   @Override
   public void disabledInit() {
   }
 
-
   @Override
   public void disabledPeriodic() {
   }
+
+
 
 
   @Override
@@ -224,9 +281,13 @@ else if (time < 8.5) {
   }
 
 
+
+
   @Override
   public void testPeriodic() {
   }
+
+
 
 
   @Override
@@ -234,7 +295,10 @@ else if (time < 8.5) {
   }
 
 
+
+
   @Override
   public void simulationPeriodic() {
   }
 }
+
