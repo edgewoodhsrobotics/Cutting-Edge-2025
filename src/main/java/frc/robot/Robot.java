@@ -17,7 +17,6 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
-
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -48,7 +47,7 @@ public class Robot extends TimedRobot {
     elevatorFollower = new SparkMax(6, MotorType.kBrushless);
     armTop = new SparkMax(8, MotorType.kBrushless);
     armBottom = new SparkMax(7, MotorType.kBrushless);
-   
+  
     autoTimer = new Timer();
 
 
@@ -110,7 +109,7 @@ public class Robot extends TimedRobot {
 
 
     armTopConfig.apply(globalConfig);
-
+    
 
 
 
@@ -132,6 +131,8 @@ public class Robot extends TimedRobot {
     elevatorFollower.configure(elevatorFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     armTop.configure(armTopConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     armBottom.configure(armBottomConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+  
 
 
     // Initialize joystick
@@ -177,9 +178,6 @@ public class Robot extends TimedRobot {
     }
    */
 
-
-
-
     //Left
 if (time < 5.5) {
   leftLeader.set(0.3);
@@ -195,20 +193,11 @@ else if (time < 8.5) {
   leftLeader.set(0);
   rightLeader.set(0);
 }
-
-
- 
   }
-
-
-
 
   @Override
   public void teleopInit() {
   }
-
-
-
 
   @Override
   public void teleopPeriodic() {
@@ -217,42 +206,37 @@ else if (time < 8.5) {
   double leftPower = joystick.getLeftY();
   double rightPower = joystick.getRightY();
 
-
   leftLeader.set(((Math.pow(leftPower, 3))*0.9)*0.5);
   rightLeader.set(((Math.pow(rightPower, 3))*0.5)*0.5);
    */
- 
 
-
-    //Arcade Drive
-   
+   //Arcade Drive
     double forward = (Math.pow(joystick.getLeftY(), 3))*0.30;
     double rotation = (Math.pow(joystick.getRightX(), 3))*0.30;
-
 
     leftLeader.set(forward - rotation);
     rightLeader.set((forward + rotation));
 
-
+//ARM STUFF
+int pov = joystick.getPOV();
   //Arm Top
-  if (joystick.getAButton()) {
+  if (pov == 0 || pov == 90) {
       armTop.set(0.1); 
-  } else {
-      armTop.set(0);
-
+  } else if (pov == 180 || pov == 270 ) {
+    armTop.set(-0.1); 
+} else {
+  armTop.set(0.00000000000001);
+};
 
   //Arm Bottom
-  if (joystick.getXButton()) {
+  if (joystick.getYButton() || pov == 0) {
     armBottom.set(-0.1);
-  } else {
-    armBottom.set(0);
-
-    if (joystick.getYButton()){
+  } else if (joystick.getXButton() || pov == 180){
       armBottom.set(0.1);
     } else {
-      armBottom.set(0);
-
+      armBottom.set(0.0);
     }
+   
     //Elevator
 
 
@@ -261,8 +245,8 @@ else if (time < 8.5) {
     double elevatorPower = ((Math.pow(((rightTrigger - leftTrigger)), 3)) * 0.5);
     elevatorLeader.set(elevatorPower);
   }
-  }
-}
+  
+
 
 
   @Override
