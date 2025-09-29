@@ -13,8 +13,11 @@ package frc.robot;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.ClosedLoopConfig;
+import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -33,7 +36,8 @@ public class Robot extends TimedRobot {
   SparkMax armTop;
   SparkMax armBottom;
   XboxController joystick;
- 
+  RelativeEncoder armTopEncoder;
+  RelativeEncoder armBottomEncoder;
   Timer autoTimer;
 
 
@@ -45,13 +49,12 @@ public class Robot extends TimedRobot {
     rightFollower = new SparkMax(1, MotorType.kBrushed);
     elevatorLeader = new SparkMax(5, MotorType.kBrushless);
     elevatorFollower = new SparkMax(6, MotorType.kBrushless);
+
     armTop = new SparkMax(8, MotorType.kBrushless);
     armBottom = new SparkMax(7, MotorType.kBrushless);
-  
+    armTopEncoder = armTop.getEncoder();
+    armBottomEncoder = armBottom.getEncoder();
     autoTimer = new Timer();
-
-
-
 
     /*
      * Create new SPARK MAX configuration objects. These will store the
@@ -65,7 +68,12 @@ public class Robot extends TimedRobot {
     SparkMaxConfig elevatorFollowerConfig = new SparkMaxConfig();
     SparkMaxConfig armTopConfig = new SparkMaxConfig();
     SparkMaxConfig armBottomConfig = new SparkMaxConfig();
-   
+    EncoderConfig armTopEncoderConfig = new EncoderConfig();
+    EncoderConfig armBottomEncoderConfig = new EncoderConfig();
+    ClosedLoopConfig armTopClosedLoopConfig = new ClosedLoopConfig();
+    ClosedLoopConfig armBottomClosedLoopConfig = new ClosedLoopConfig();
+
+
     /*
      * Set parameters that will apply to all SPARKs. We will also use this as
      * the left leader config.
@@ -74,44 +82,33 @@ public class Robot extends TimedRobot {
         .smartCurrentLimit(50)
         .idleMode(IdleMode.kBrake);
 
-
     // Apply the global config and invert since it is on the opposite side
     rightLeaderConfig
         .apply(globalConfig)
         .inverted(true);
-
 
     // Apply the global config and set the leader SPARK for follower mode
     leftFollowerConfig
         .apply(globalConfig)
         .follow(leftLeader);
 
-
     // Apply the global config
     rightFollowerConfig
         .apply(globalConfig)
         .follow(rightLeader);
 
-
-    // Apply the global config and set the leader SPARK for follower mode
-
+    armTopEncoderConfig.positionConversionFactor(360*15);
+    armBottomEncoderConfig.positionConversionFactor(360*15);
+    
+    armTopConfig.apply(globalConfig).apply(armTopEncoderConfig);
+    armBottomConfig.apply(globalConfig).apply(armBottomEncoderConfig);
 
     elevatorLeaderConfig
     .apply(globalConfig);
 
-
     elevatorFollowerConfig
     .apply(globalConfig)
     .follow(elevatorLeader);
-
-
-    armBottomConfig.apply(globalConfig);
-
-
-    armTopConfig.apply(globalConfig);
-    
-
-
 
     /*
      * Apply the configuration to the SPARKs.
@@ -132,13 +129,11 @@ public class Robot extends TimedRobot {
     armTop.configure(armTopConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     armBottom.configure(armBottomConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-  
-
-
     // Initialize joystick
     joystick = new XboxController(0);
+    armTopEncoder.setPosition(30);
+    armBottomEncoder.setPosition(20);
   }
-
 
   @Override
   public void robotPeriodic() {
@@ -219,22 +214,29 @@ else if (time < 8.5) {
 
 //ARM STUFF
 int pov = joystick.getPOV();
+double armTopEncoderValue = armTopEncoder.getPosition();
+double armBottomEncoderValue = armBottomEncoder.getPosition();
+double kSTop = 0.02;
+double kSTopValue = kSTop*Math.sin(armTopEncoderValue);
+double kSBottom = 0.02;
+double kSBottomValue = kSBottom*Math.sin(armBottomEncoderValue);
+
   //Arm Top
   if (pov == 0 || pov == 90) {
-      armTop.set(0.1); 
+      armTop.set(0.1 + kSTopValue); 
   } else if (pov == 180 || pov == 270 ) {
-    armTop.set(-0.1); 
+    armTop.set(-0.1 + kSTopValue); 
 } else {
-  armTop.set(0.00000000000001);
+  armTop.set(0.0 + kSTopValue);
 };
 
   //Arm Bottom
   if (joystick.getYButton() || pov == 0) {
-    armBottom.set(-0.1);
+    armBottom.set(-0.1 + kSBottomValue);
   } else if (joystick.getXButton() || pov == 180){
-      armBottom.set(0.1);
+      armBottom.set(0.1 + kSBottomValue);
     } else {
-      armBottom.set(0.0);
+      armBottom.set(0.0 + kSBottomValue);
     }
    
     //Elevator
