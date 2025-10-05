@@ -224,24 +224,23 @@ double kSBottomValue = kSBottom*Math.sin(armBottomEncoderValue);
   //Arm Top
   if (pov == 0 || pov == 90) {
       armTop.set(0.1 + kSTopValue); 
-  } else if (pov == 180 || pov == 270 ) {
-    armTop.set(-0.1 + kSTopValue); 
+  } else if (pov == 180 || pov == 270 || joystick.getAButton() ) {
+    armTop.set(-0.6 + kSTopValue); 
 } else {
   armTop.set(0.0 + kSTopValue);
 };
 
   //Arm Bottom
-  if (joystick.getYButton() || pov == 0) {
+  if (joystick.getYButton() || pov == 0 || joystick.getAButton()) {
     armBottom.set(-0.1 + kSBottomValue);
   } else if (joystick.getXButton() || pov == 180){
       armBottom.set(0.1 + kSBottomValue);
     } else {
       armBottom.set(0.0 + kSBottomValue);
     }
+
    
     //Elevator
-
-
     double rightTrigger = joystick.getRightTriggerAxis();
     double leftTrigger = joystick.getLeftTriggerAxis();
     double elevatorPower = ((Math.pow(((rightTrigger - leftTrigger)), 3)) * 0.5);
