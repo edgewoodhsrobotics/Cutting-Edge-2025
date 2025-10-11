@@ -35,7 +35,8 @@ public class Robot extends TimedRobot {
   SparkMax elevatorFollower;
   SparkMax armTop;
   SparkMax armBottom;
-  XboxController joystick;
+  XboxController joystick1;
+  XboxController joystick2;
   RelativeEncoder armTopEncoder;
   RelativeEncoder armBottomEncoder;
   Timer autoTimer;
@@ -130,7 +131,8 @@ public class Robot extends TimedRobot {
     armBottom.configure(armBottomConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     // Initialize joystick
-    joystick = new XboxController(0);
+    joystick1 = new XboxController(0);
+    joystick2 = new XboxController(1);
     armTopEncoder.setPosition(30);
     armBottomEncoder.setPosition(20);
   }
@@ -141,7 +143,6 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Left Out", leftLeader.getAppliedOutput());
     SmartDashboard.putNumber("Right Out", rightLeader.getAppliedOutput());
   }
-
 
   @Override
   public void autonomousInit() {
@@ -155,39 +156,13 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     double time = autoTimer.get();
-  //Right
-  /*
-   * if (time < 5.5) {
-      leftLeader.set(0.3);
-      rightLeader.set(0.3);
-    } else if (time < 6.2) {
-    leftLeader.set(0.0);
-    rightLeader.set(-0.5);
-    }
-    else if (time < 8.5) {
-      leftLeader.set(0.3);
-      rightLeader.set(0.3);
-      } else {
-      leftLeader.set(0);
-      rightLeader.set(0);
-    }
-   */
+
 
     //Left
 if (time < 5.5) {
   leftLeader.set(0.3);
   rightLeader.set(0.3);
-} else if (time < 6.2) {
-leftLeader.set(-0.5);
-rightLeader.set(0.0);
-}
-else if (time < 8.5) {
-  leftLeader.set(0.3);
-  rightLeader.set(0.3);
-  } else {
-  leftLeader.set(0);
-  rightLeader.set(0);
-}
+};
   }
 
   @Override
@@ -206,14 +181,14 @@ else if (time < 8.5) {
    */
 
    //Arcade Drive
-    double forward = (Math.pow(joystick.getLeftY(), 3))*0.30;
-    double rotation = (Math.pow(joystick.getRightX(), 3))*0.30;
+    double forward = (Math.pow(joystick1.getLeftY(), 3))*0.60;
+    double rotation = (Math.pow(joystick1.getRightX(), 3))*0.60;
 
     leftLeader.set(forward - rotation);
     rightLeader.set((forward + rotation));
 
 //ARM STUFF
-int pov = joystick.getPOV();
+int pov = joystick2.getPOV();
 double armTopEncoderValue = armTopEncoder.getPosition();
 double armBottomEncoderValue = armBottomEncoder.getPosition();
 double kSTop = 0.02;
@@ -224,16 +199,16 @@ double kSBottomValue = kSBottom*Math.sin(armBottomEncoderValue);
   //Arm Top
   if (pov == 0 || pov == 90) {
       armTop.set(0.1 + kSTopValue); 
-  } else if (pov == 180 || pov == 270 || joystick.getAButton() ) {
-    armTop.set(-0.6 + kSTopValue); 
+  } else if (pov == 180 || pov == 270 || joystick2.getAButton() || joystick2.getRightBumperButton()) {
+    armTop.set(-0.1 + kSTopValue); 
 } else {
   armTop.set(0.0 + kSTopValue);
 };
 
   //Arm Bottom
-  if (joystick.getYButton() || pov == 0 || joystick.getAButton()) {
+  if (joystick2.getYButton() || pov == 0 || joystick2.getAButton() || joystick2.getRightBumperButton()) {
     armBottom.set(-0.1 + kSBottomValue);
-  } else if (joystick.getXButton() || pov == 180){
+  } else if (joystick2.getXButton() || pov == 180){
       armBottom.set(0.1 + kSBottomValue);
     } else {
       armBottom.set(0.0 + kSBottomValue);
@@ -241,8 +216,8 @@ double kSBottomValue = kSBottom*Math.sin(armBottomEncoderValue);
 
    
     //Elevator
-    double rightTrigger = joystick.getRightTriggerAxis();
-    double leftTrigger = joystick.getLeftTriggerAxis();
+    double rightTrigger = joystick2.getRightTriggerAxis();
+    double leftTrigger = joystick2.getLeftTriggerAxis();
     double elevatorPower = ((Math.pow(((rightTrigger - leftTrigger)), 3)) * 0.5);
     elevatorLeader.set(elevatorPower);
   }
