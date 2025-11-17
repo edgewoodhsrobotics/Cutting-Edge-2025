@@ -181,8 +181,8 @@ if (time < 5.5) {
    */
 
    //Arcade Drive
-    double forward = (Math.pow(joystick1.getLeftY(), 3))*0.60;
-    double rotation = (Math.pow(joystick1.getRightX(), 3))*0.60;
+    double forward = (Math.pow(joystick2.getLeftY(), 3))*0.30;
+    double rotation = (Math.pow(joystick2.getRightX(), 3))*0.30;
 
     leftLeader.set(forward - rotation);
     rightLeader.set((forward + rotation));
